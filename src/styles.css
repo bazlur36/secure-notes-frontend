@@ -1,0 +1,22 @@
+/* Intentionally minimal: functionality over visuals */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: #f6f6f6; color: #222; }
+.container { max-width: 960px; margin: 0 auto; padding: 16px; }
+header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+nav button.active { background: #222; color: #fff; }
+.card { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 12px; margin-bottom: 10px; }
+.narrow { max-width: 420px; }
+form input, form textarea, form select { display: block; width: 100%; margin-bottom: 8px; padding: 8px; font: inherit; }
+.row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.row input { margin: 0; flex: 1; min-width: 160px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+button { padding: 6px 12px; cursor: pointer; font: inherit; border: 1px solid #999; background: #fff; border-radius: 4px; }
+button:disabled { opacity: 0.5; cursor: default; }
+button.danger { border-color: #c33; color: #c33; }
+.error { color: #c33; }
+.ok { color: #282; }
+.muted { color: #777; }
+.pager { display: flex; gap: 12px; align-items: center; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: #fff; display: block; overflow-x: auto; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #eee; vertical-align: top; }
