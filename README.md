@@ -3,7 +3,9 @@
 A deliberately minimal React (Vite) client for the Secure Notes API. It was written by hand (no starter template or UI kit).
 The task is backend-focused, so the UI aims for function over looks.
 
-- **Live:** `<VERCEL_URL>` · **Backend repo:** https://github.com/bazlur36/secure-notes-backend · **API:** `<RENDER_URL>/api`
+- **Live:** https://secure-notes-frontend-lovat.vercel.app · **Backend repo:** https://github.com/bazlur36/secure-notes-backend · **API:** https://secure-notes-frontend-lovat.vercel.app/api/health
+- **Demo logins:** `admin@example.com` / `Admin@12345` (admin) · `user@example.com` / `User@12345` (user)
+- The API runs on Render's free tier and sleeps when idle, so the first request can take ~30–50 s.
 
 ## Features
 | Tab | What it exercises |
@@ -31,6 +33,5 @@ The backend's `CORS_ORIGIN` must include the frontend origin (the default is `ht
   `vercel.json` rewrites `/api/*` to the Render backend server-side, so the browser only talks to the Vercel origin
   (same-origin: no CORS needed, and the browser never loads the `*.onrender.com` domain directly).
 - **Netlify:** build command `npm run build`, publish directory `dist`, same env var.
-- Then set the backend's `CORS_ORIGIN` to the deployed frontend URL.
 
 The app has no client-side routes, so no SPA rewrite rules are needed.
