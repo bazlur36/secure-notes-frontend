@@ -5,7 +5,7 @@ import Pager from './Pager';
 import { splitInterests } from './AuthForm';
 import { Alert, Chips, ListState, PageHead } from './ui';
 
-const EMPTY = { name: '', email: '', password: '', role: 'user', interests: '' };
+const EMPTY = { name: '', email: '', password: '', confirm: '', role: 'user', interests: '' };
 
 export default function AdminUsers({ me }) {
   const users = usePaged('/admin/users');
@@ -17,6 +17,7 @@ export default function AdminUsers({ me }) {
   async function save(e) {
     e.preventDefault();
     setMsg('');
+    if (form.password && form.password !== form.confirm) return setMsg('Passwords do not match');
     try {
       const body = { name: form.name, email: form.email, role: form.role, interests: splitInterests(form.interests) };
       if (form.password) body.password = form.password;
@@ -43,7 +44,7 @@ export default function AdminUsers({ me }) {
 
   function edit(u) {
     setEditingId(u._id);
-    setForm({ name: u.name, email: u.email, password: '', role: u.role, interests: u.interests.join(', ') });
+    setForm({ name: u.name, email: u.email, password: '', confirm: '', role: u.role, interests: u.interests.join(', ') });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -77,6 +78,18 @@ export default function AdminUsers({ me }) {
               value={form.password}
               onChange={set('password')}
               required={!editingId}
+            />
+          </div>
+          <div>
+            <label className="lbl" htmlFor="u-pw2">Confirm password</label>
+            <input
+              id="u-pw2"
+              type="password"
+              autoComplete="new-password"
+              placeholder={editingId ? 'Only if changing' : 'Repeat the password'}
+              value={form.confirm}
+              onChange={set('confirm')}
+              required={!editingId || Boolean(form.password)}
             />
           </div>
           <div>

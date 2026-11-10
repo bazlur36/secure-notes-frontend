@@ -9,7 +9,7 @@ const DEMO = [
 
 export default function AuthForm({ onAuth }) {
   const [mode, setMode] = useState('login');
-  const [form, setForm] = useState({ name: '', email: '', password: '', interests: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '', interests: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [slow, setSlow] = useState(false);
@@ -26,6 +26,7 @@ export default function AuthForm({ onAuth }) {
   async function submit(e) {
     e.preventDefault();
     setError('');
+    if (!isLogin && form.password !== form.confirm) return setError('Passwords do not match');
     setBusy(true);
     try {
       const body = isLogin
@@ -43,6 +44,7 @@ export default function AuthForm({ onAuth }) {
 
   const switchMode = () => {
     setMode(isLogin ? 'register' : 'login');
+    setForm({ ...form, password: '', confirm: '' });
     setError('');
   };
 
@@ -78,6 +80,19 @@ export default function AuthForm({ onAuth }) {
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
               />
             </div>
+            {!isLogin && (
+              <div className="field">
+                <label htmlFor="confirm">Confirm password</label>
+                <input
+                  id="confirm"
+                  type="password"
+                  value={form.confirm}
+                  onChange={set('confirm')}
+                  required
+                  autoComplete="new-password"
+                />
+              </div>
+            )}
             {!isLogin && (
               <div className="field">
                 <label htmlFor="interests">Interests</label>

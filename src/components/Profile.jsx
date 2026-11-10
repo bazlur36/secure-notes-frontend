@@ -4,18 +4,21 @@ import { splitInterests } from './AuthForm';
 import { Alert, PageHead } from './ui';
 
 export default function Profile({ me, onUpdate }) {
-  const [form, setForm] = useState({ name: me.name, interests: me.interests.join(', '), password: '' });
+  const [form, setForm] = useState({ name: me.name, interests: me.interests.join(', '), password: '', confirm: '' });
   const [msg, setMsg] = useState({ type: '', text: '' });
 
   async function save(e) {
     e.preventDefault();
     setMsg({ type: '', text: '' });
+    if (form.password && form.password !== form.confirm) {
+      return setMsg({ type: 'error', text: 'Passwords do not match' });
+    }
     try {
       const body = { name: form.name, interests: splitInterests(form.interests) };
       if (form.password) body.password = form.password;
       const res = await api('/auth/me', { method: 'PATCH', body });
       onUpdate(res.user);
-      setForm({ ...form, password: '' });
+      setForm({ ...form, password: '', confirm: '' });
       setMsg({ type: 'ok', text: 'Profile saved.' });
     } catch (err) {
       setMsg({ type: 'error', text: err.message });
@@ -42,6 +45,12 @@ export default function Profile({ me, onUpdate }) {
           <label htmlFor="p-pw">New password</label>
           <input id="p-pw" type="password" placeholder="Leave blank to keep current" autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         </div>
+        {form.password && (
+          <div className="field">
+            <label htmlFor="p-pw2">Confirm new password</label>
+            <input id="p-pw2" type="password" autoComplete="new-password" value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} required />
+          </div>
+        )}
         <button type="submit" className="primary">Save changes</button>
         <Alert type={msg.type}>{msg.text}</Alert>
       </form>
