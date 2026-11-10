@@ -3,7 +3,7 @@
 A deliberately minimal React (Vite) client for the Secure Notes API. It was written by hand (no starter template or UI kit).
 The task is backend-focused, so the UI aims for function over looks.
 
-- **Live:** `<VERCEL_URL>` · **Backend repo:** `<BACKEND_REPO_URL>` · **API:** `<RENDER_URL>/api`
+- **Live:** `<VERCEL_URL>` · **Backend repo:** https://github.com/bazlur36/secure-notes-backend · **API:** `<RENDER_URL>/api`
 
 ## Features
 | Tab | What it exercises |
