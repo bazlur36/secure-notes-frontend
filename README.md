@@ -27,7 +27,7 @@ npm run dev               # http://localhost:5173
 The backend's `CORS_ORIGIN` must include the frontend origin (the default is `http://localhost:5173`).
 
 ## Deploy (Vercel or Netlify)
-- **Vercel:** import the repo. The framework preset (Vite) is detected automatically. Set `VITE_API_URL=/api` and deploy.
+- **Vercel:** import the repo. The framework preset (Vite) is detected automatically. No env var is needed: production builds call `/api` by default (override with `VITE_API_URL`).
   `vercel.json` rewrites `/api/*` to the Render backend server-side, so the browser only talks to the Vercel origin
   (same-origin: no CORS needed, and the browser never loads the `*.onrender.com` domain directly).
 - **Netlify:** build command `npm run build`, publish directory `dist`, same env var.

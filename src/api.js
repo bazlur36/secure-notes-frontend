@@ -1,4 +1,5 @@
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Dev: local API. Production: same-origin /api, proxied to Render by vercel.json.
+const BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
 const TOKEN_KEY = 'secure-notes-token';
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
