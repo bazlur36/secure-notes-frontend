@@ -7,15 +7,24 @@ import Interests from './components/Interests';
 import Profile from './components/Profile';
 import AdminUsers from './components/AdminUsers';
 import AdminNotes from './components/AdminNotes';
+import { Logo } from './components/ui';
 
 const TABS = [
   { id: 'notes', label: 'My notes' },
   { id: 'posts', label: 'Posts' },
   { id: 'interests', label: 'Interests' },
   { id: 'profile', label: 'Profile' },
-  { id: 'admin-users', label: 'Admin: users', admin: true },
-  { id: 'admin-notes', label: 'Admin: all notes', admin: true },
+  { id: 'admin-users', label: 'Users', admin: true },
+  { id: 'admin-notes', label: 'All notes', admin: true },
 ];
+
+const initials = (name = '') =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('');
 
 export default function App() {
   const [me, setMe] = useState(null);
@@ -37,38 +46,47 @@ export default function App() {
     setTab('notes');
   };
 
-  if (booting) return <p className="container">Loading…</p>;
+  if (booting) return <div className="center-screen">Loading…</div>;
+  if (!me) return <AuthForm onAuth={setMe} />;
+
+  const isAdmin = me.role === 'admin';
+  const userTabs = TABS.filter((t) => !t.admin);
+  const adminTabs = isAdmin ? TABS.filter((t) => t.admin) : [];
+  const tabButton = (t) => (
+    <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}>
+      {t.label}
+    </button>
+  );
 
   return (
-    <div className="container">
-      <header>
-        <h1>Secure Notes</h1>
-        {me && (
-          <span>
-            {me.name} ({me.role}) <button onClick={logout}>Log out</button>
-          </span>
-        )}
+    <>
+      <header className="topbar">
+        <div className="container">
+          <div className="brand">
+            <Logo /> Secure Notes
+          </div>
+          <div className="user">
+            <span className="avatar" title={me.email}>{initials(me.name)}</span>
+            <span className="user-name">{me.name}</span>
+            <span className={`badge ${isAdmin ? 'admin' : ''}`}>{me.role}</span>
+            <button className="ghost sm" onClick={logout}>Log out</button>
+          </div>
+        </div>
       </header>
 
-      {!me ? (
-        <AuthForm onAuth={setMe} />
-      ) : (
-        <>
-          <nav>
-            {TABS.filter((t) => !t.admin || me.role === 'admin').map((t) => (
-              <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}>
-                {t.label}
-              </button>
-            ))}
-          </nav>
-          {tab === 'notes' && <Notes />}
-          {tab === 'posts' && <Posts me={me} />}
-          {tab === 'interests' && <Interests />}
-          {tab === 'profile' && <Profile me={me} onUpdate={setMe} />}
-          {tab === 'admin-users' && me.role === 'admin' && <AdminUsers me={me} />}
-          {tab === 'admin-notes' && me.role === 'admin' && <AdminNotes />}
-        </>
-      )}
-    </div>
+      <main className="container">
+        <nav className="tabs">
+          {userTabs.map(tabButton)}
+          {adminTabs.length > 0 && <span className="sep" />}
+          {adminTabs.map(tabButton)}
+        </nav>
+        {tab === 'notes' && <Notes />}
+        {tab === 'posts' && <Posts me={me} />}
+        {tab === 'interests' && <Interests />}
+        {tab === 'profile' && <Profile me={me} onUpdate={setMe} />}
+        {tab === 'admin-users' && isAdmin && <AdminUsers me={me} />}
+        {tab === 'admin-notes' && isAdmin && <AdminNotes />}
+      </main>
+    </>
   );
 }

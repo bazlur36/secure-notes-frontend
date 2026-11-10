@@ -3,6 +3,7 @@ import { api } from '../api';
 import { usePaged } from '../usePaged';
 import Pager from './Pager';
 import { splitInterests } from './AuthForm';
+import { Alert, Chips, ListState, PageHead } from './ui';
 
 const EMPTY = { name: '', email: '', password: '', role: 'user', interests: '' };
 
@@ -21,8 +22,7 @@ export default function AdminUsers({ me }) {
       if (form.password) body.password = form.password;
       if (editingId) await api(`/admin/users/${editingId}`, { method: 'PATCH', body });
       else await api('/admin/users', { method: 'POST', body });
-      setForm(EMPTY);
-      setEditingId(null);
+      cancel();
       users.reload();
     } catch (err) {
       setMsg(err.message);
@@ -30,9 +30,11 @@ export default function AdminUsers({ me }) {
   }
 
   async function remove(u) {
+    if (!window.confirm(`Delete ${u.name}? Their notes and posts will also be removed.`)) return;
     setMsg('');
     try {
       await api(`/admin/users/${u._id}`, { method: 'DELETE' });
+      if (u._id === editingId) cancel();
       users.reload();
     } catch (err) {
       setMsg(err.message);
@@ -42,55 +44,90 @@ export default function AdminUsers({ me }) {
   function edit(u) {
     setEditingId(u._id);
     setForm({ name: u.name, email: u.email, password: '', role: u.role, interests: u.interests.join(', ') });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancel() {
+    setEditingId(null);
+    setForm(EMPTY);
   }
 
   return (
     <div>
-      <h2>Manage users</h2>
+      <PageHead title="Users" subtitle="Create, edit and remove accounts (admin only)." />
+
       <form className="card" onSubmit={save}>
-        <div className="grid">
-          <input placeholder="Name" value={form.name} onChange={set('name')} required />
-          <input type="email" placeholder="Email" value={form.email} onChange={set('email')} required />
-          <input
-            type="password"
-            placeholder={editingId ? 'New password (optional)' : 'Password'}
-            value={form.password}
-            onChange={set('password')}
-            required={!editingId}
-          />
-          <select value={form.role} onChange={set('role')}>
-            <option value="user">user</option>
-            <option value="admin">admin</option>
-          </select>
-          <input placeholder="Interests (comma separated)" value={form.interests} onChange={set('interests')} />
+        <h3 className="card-title">{editingId ? 'Edit user' : 'Add user'}</h3>
+        <div className="form-grid">
+          <div>
+            <label className="lbl" htmlFor="u-name">Name</label>
+            <input id="u-name" value={form.name} onChange={set('name')} required />
+          </div>
+          <div>
+            <label className="lbl" htmlFor="u-email">Email</label>
+            <input id="u-email" type="email" value={form.email} onChange={set('email')} required />
+          </div>
+          <div>
+            <label className="lbl" htmlFor="u-pw">{editingId ? 'New password' : 'Password'}</label>
+            <input
+              id="u-pw"
+              type="password"
+              autoComplete="new-password"
+              placeholder={editingId ? 'Leave blank to keep' : 'At least 8 characters'}
+              value={form.password}
+              onChange={set('password')}
+              required={!editingId}
+            />
+          </div>
+          <div>
+            <label className="lbl" htmlFor="u-role">Role</label>
+            <select id="u-role" value={form.role} onChange={set('role')}>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div>
+            <label className="lbl" htmlFor="u-int">Interests</label>
+            <input id="u-int" placeholder="chess, reading" value={form.interests} onChange={set('interests')} />
+          </div>
         </div>
-        <div className="row">
-          <button type="submit">{editingId ? 'Update user' : 'Add user'}</button>
-          {editingId && <button type="button" onClick={() => (setEditingId(null), setForm(EMPTY))}>Cancel</button>}
+        <div className="actions">
+          <button type="submit" className="primary">{editingId ? 'Save changes' : 'Add user'}</button>
+          {editingId && <button type="button" onClick={cancel}>Cancel</button>}
         </div>
-        {msg && <p className="error">{msg}</p>}
+        <Alert>{msg}</Alert>
       </form>
 
-      {users.error && <p className="error">{users.error}</p>}
-      <table>
-        <thead>
-          <tr><th>Name</th><th>Email</th><th>Role</th><th>Interests</th><th></th></tr>
-        </thead>
-        <tbody>
-          {users.data.map((u) => (
-            <tr key={u._id}>
-              <td>{u.name}</td>
-              <td>{u.email}</td>
-              <td>{u.role}</td>
-              <td>{u.interests.join(', ')}</td>
-              <td className="row">
-                <button onClick={() => edit(u)}>Edit</button>
-                {u._id !== me._id && <button className="danger" onClick={() => remove(u)}>Delete</button>}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <Alert>{users.error}</Alert>
+      {users.data.length > 0 && (
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Role</th><th>Interests</th><th></th></tr>
+            </thead>
+            <tbody>
+              {users.data.map((u) => (
+                <tr key={u._id}>
+                  <td>
+                    <strong>{u.name}</strong>
+                    {u._id === me._id && <span className="muted"> (you)</span>}
+                    <span className="sub">{u.email}</span>
+                  </td>
+                  <td><span className={`badge ${u.role === 'admin' ? 'admin' : ''}`}>{u.role}</span></td>
+                  <td><Chips items={u.interests} /></td>
+                  <td>
+                    <div className="item-actions" style={{ justifyContent: 'flex-end' }}>
+                      <button className="sm" onClick={() => edit(u)}>Edit</button>
+                      {u._id !== me._id && <button className="sm danger" onClick={() => remove(u)}>Delete</button>}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {!users.error && <ListState loading={users.loading} count={users.data.length} empty="No users." />}
       <Pager meta={users.meta} page={users.page} setPage={users.setPage} />
     </div>
   );
